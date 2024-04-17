@@ -22,4 +22,6 @@ urlpatterns = [
         UserViewSet.as_view({"post": "reset_password_confirm"}),
         name="reset_password_confirm",
     ),
+    path("auth/users/me/", UserViewSet.as_view({"get": "me"}), name="me"),
+    path("auth/users/", UserViewSet.as_view({"get": "list"}), name="users"),
 ]
