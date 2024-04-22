@@ -32,16 +32,7 @@ class AccessKey(models.Model):
     def is_active(self):
         return self.status == "active" and self.expires_at > timezone.now()
 
-    def is_expired(self):
-        return self.status == "expired" and self.expires_at < timezone.now()
-
-    def is_revoked(self):
-        return self.status == "revoked"
-
-    def deactivate(self):
-        self.status = "expired"
-        self.save()
-
-    def revoke(self):
-        self.status = "revoked"
-        self.save()
+    def save(self):
+        if not self.is_active() and self.status == "active":
+            self.status = "expired"
+        super().save()
