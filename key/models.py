@@ -8,7 +8,7 @@ User = get_user_model()
 
 class AccessKey(models.Model):
     STATUS_CHOICES = [
-        ("pending", "Pending"),
+        ("inactive", "Inactive"),
         ("active", "Active"),
         ("expired", "Expired"),
         ("revoked", "Revoked"),
@@ -16,7 +16,7 @@ class AccessKey(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     key = models.CharField(max_length=255, unique=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="inactive")
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     procurement_date = models.DateTimeField(null=True, blank=True)
     expires_at = models.DateTimeField(null=True, blank=True)
@@ -27,7 +27,7 @@ class AccessKey(models.Model):
         verbose_name_plural = "Access Keys"
 
     def __str__(self):
-        return str(self.key)[:10]
+        return f"{str(self.owner)}: KEY - {str(self.key)[:13]}..."
 
     def is_active(self):
         return self.status == "active" and self.expires_at > timezone.now()

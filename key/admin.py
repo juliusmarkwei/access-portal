@@ -4,7 +4,7 @@ from .models import AccessKey
 
 @admin.register(AccessKey)
 class AccessKeyAdmin(admin.ModelAdmin):
-    list_display = ("id", "key", "owner", "status", "procurement_date", "expires_at")
+    list_display = ("owner", "status", "key", "procurement_date", "expires_at")
     search_fields = ("key", "owner__email")
     list_filter = ("status", "owner__email", "procurement_date", "expires_at")
     ordering = ("-created_at",)
