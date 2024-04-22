@@ -10,7 +10,9 @@ urlpatterns = [
     path("auth/signup/", UserViewSet.as_view({"post": "create"}), name="signup"),
     path("auth/refresh/", TokenRefreshView.as_view(), name="refresh"),
     path(
-        "auth/activate/", UserViewSet.as_view({"post": "activation"}), name="activate"
+        "auth/user/activate/",
+        UserViewSet.as_view({"post": "activation"}),
+        name="activate",
     ),
     path(
         "auth/reset-password/",
@@ -24,4 +26,5 @@ urlpatterns = [
     ),
     path("auth/users/me/", UserViewSet.as_view({"get": "me"}), name="me"),
     path("auth/users/", UserViewSet.as_view({"get": "list"}), name="users"),
+    path("access-key", ITPersonalAccessKeyView.as_view(), name="access-key"),
 ]
