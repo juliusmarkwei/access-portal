@@ -19,7 +19,7 @@ class AccessKey(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="inactive")
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     procurement_date = models.DateTimeField(null=True, blank=True)
-    expires_at = models.DateTimeField(null=True, blank=True)
+    expiry_date = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
