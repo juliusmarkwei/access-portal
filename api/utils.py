@@ -34,15 +34,18 @@ def sendEmail(
     """
     if accessGranted:
         title = "Access Key Activated ✅"
-        message = f"Dear {keyData.get('owner')}, \n\nWe are pleased to inform you that your access key has been successfully activated and it's scheduled to expire at {keyData.get('expiry_date')} (30 days). You can now enjoy full access to our system and its features."
+        message = f"Dear {keyData.get('owner')}, \n\nWe are pleased to inform you that your access key has been successfully activated and it's scheduled to expire at {keyData.get('expiry_date')} (30 days). You can now enjoy full access to our system and its features.\
+            \nThank you for choosing us."
 
     elif KeyRevoked:
         title = "Access Key Revoked ❌"
-        message = f"Dear {keyData['owner']}, \n\nWe regret to inform you that your access key has been revoked. This could be due to a violation of our terms of service. Please contact us if you believe this is an error."
+        message = f"Dear {keyData['owner']}, \n\nWe regret to inform you that your access key has been revoked. This could be due to a violation of our terms of service. Please contact us if you believe this is an error.\
+            \nThank you for your understanding."
 
     elif keyExpired:
         title = "Access Key Expired :negative_squared_cross_mark:"
-        message = f"Dear {keyData['owner']}, \n\nWe regret to inform you that your access key has expired. You can generate a new key by logging into your AccessPortal account."
+        message = f"Dear {keyData['owner']}, \n\nWe regret to inform you that your access key has expired as of [Expiry Date]. This means that you will no longer be able to access our system using the provided access key.\
+            \nIf you require continued access to our system, please log into ypur account to request a new access key."
 
     send_mail(
         title,

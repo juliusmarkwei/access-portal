@@ -86,3 +86,33 @@ class AdminAccessKeyActivationView(APIView):
             {"error": "Email is required to activate a key."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class AdminAccessKeyRevocationView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        userEmail = request.data.get("email", None)
+        if userEmail:
+            user = User.objects.get(email=userEmail)
+            key = AccessKey.objects.filter(owner=user, status="active").first()
+            if key:
+                key.status = "revoked"
+                key.save()
+
+                data = {
+                    "owner": user.full_name,
+                }
+                sendEmail(KeyRevoked=True, recipient=user.email, keyData=data)
+                return Response(
+                    {"message": "Key revoked successfully"},
+                    status=status.HTTP_200_OK,
+                )
+            return Response(
+                {"error": "No active key found for this user"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(
+            {"error": "Email is required to revoke a key."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )

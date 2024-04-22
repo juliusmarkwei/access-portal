@@ -27,5 +27,14 @@ urlpatterns = [
     path("auth/users/me/", UserViewSet.as_view({"get": "me"}), name="me"),
     path("auth/users/", UserViewSet.as_view({"get": "list"}), name="users"),
     path("access-key", ITPersonalAccessKeyView.as_view(), name="access-key"),
-    path("access-key/activate", AdminAccessKeyActivationView.as_view(), name="admin-access-key-activate"),
+    path(
+        "access-key/activate",
+        AdminAccessKeyActivationView.as_view(),
+        name="admin-access-key-activate",
+    ),
+    path(
+        "access-key/revoke",
+        AdminAccessKeyRevocationView.as_view(),
+        name="admin-access-key-revoke",
+    ),
 ]
