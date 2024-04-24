@@ -1,6 +1,6 @@
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from key.models import AccessKey
+from src.key.models import AccessKey
 from .utils import sendEmail
 
 

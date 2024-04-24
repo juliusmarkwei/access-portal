@@ -34,8 +34,8 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "djoser",
     # my apps
-    "key",
-    "user",
+    "src.key",
+    "src.user",
     "api",
     "corsheaders",
 ]
@@ -147,9 +147,9 @@ SIMPLE_JWT = {
 
 DJOSER = {
     "SERIALIZERS": {
-        "user_create_password_retype": "user.serializers.UserCreateSerializer",
-        "user": "user.serializers.UserSerializer",
-        "current_user": "user.serializers.UserSerializer",
+        "user_create_password_retype": "src.user.serializers.UserCreateSerializer",
+        "user": "src.user.serializers.UserSerializer",
+        "current_user": "src.user.serializers.UserSerializer",
     },
     "PASSWORD_RESET_CONFIRM_URL": "reset-password/?uid={uid}&token={token}",
     "ACTIVATION_URL": "user-activate/?uid={uid}&token={token}",
