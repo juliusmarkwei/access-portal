@@ -44,7 +44,7 @@ def sendEmail(
 
     elif keyExpired:
         title = "Access Key Expired :negative_squared_cross_mark:"
-        message = f"Dear {keyData['owner']}, \n\nWe regret to inform you that your access key has expired as of {data.get('expiry_date')}. This means that you will no longer be able to access our system using the provided access key.\
+        message = f"Dear {keyData['owner']}, \n\nWe regret to inform you that your access key has expired as of {keyData['expiry_date']}. This means that you will no longer be able to access our system using the provided access key.\
             \nIf you require continued access to our system, please log into ypur account to request a new access key."
 
     send_mail(

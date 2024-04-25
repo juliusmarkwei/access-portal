@@ -106,7 +106,7 @@ class AdminAccessKeyActivationView(APIView):
 
         # Set key expiry date to 30 days from now
         activation_date = timezone.now()
-        expiry_date = activation_date + timedelta(days=30)
+        expiry_date = activation_date + timedelta(minutes=2)
 
         key.procurement_date = activation_date
         key.expiry_date = expiry_date

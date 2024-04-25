@@ -174,3 +174,16 @@ SITE_NAME = config("SITE_NAME")
 DOMAIN = config("DOMAIN")
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
+
+
+# CELERY SETTINGS
+CELERY_BACKEND = config("CELERY_BACKEND")
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
+
+
+CELERY_BEAT_SCHEDULE = {
+    'expire-access-keys': {
+        'task': 'api.tasks.expire_access_keys',
+        'schedule': '30.0',
+    },
+}
