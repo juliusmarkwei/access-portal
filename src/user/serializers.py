@@ -22,7 +22,7 @@ class UserCreateSerializer(BaseUserCreatePasswordRetypeSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        message = "Welcome to Access Portal! Check your email to verify your account."
+        message = "Check your email to verify your account."
         return {"data": data, "status": "success", "message": message}
 
 

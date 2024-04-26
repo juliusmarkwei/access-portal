@@ -33,19 +33,20 @@ def sendEmail(
         keyData (dict, optional): Access Key Data. Defaults to None.
     """
     if accessGranted:
-        title = "Access Key Activated ✅"
-        message = f"Dear {keyData.get('owner')}, \n\nWe are pleased to inform you that your access key has been successfully activated and it's scheduled to expire at {keyData.get('expiry_date')} (30 days). You can now enjoy full access to our system and its features.\
-            \nThank you for choosing us."
+        title = "Access Key Activated"
+        message = f"Hi {keyData['owner']}, \n\nWe are pleased to inform you that your access key has been successfully activated and it's scheduled to expire at {keyData['expiry_date']} ({keyData['validity_days']} days). You can now enjoy full access to our system and its features.\
+            \nThank you for choosing Access Portal."
 
     elif KeyRevoked:
-        title = "Access Key Revoked ❌"
-        message = f"Dear {keyData['owner']}, \n\nWe regret to inform you that your access key has been revoked. This could be due to a violation of our terms of service. Please contact us if you believe this is an error.\
+        title = "Access Key Revoked"
+        message = f"Hi {keyData['owner']}, \n\nWe regret to inform you that your access key has been revoked. This could be due to a violation of our terms of service. Please contact us if you believe this is an error.\
             \nThank you for your understanding."
 
     elif keyExpired:
-        title = "Access Key Expired :negative_squared_cross_mark:"
-        message = f"Dear {keyData['owner']}, \n\nWe regret to inform you that your access key has expired as of {keyData['expiry_date']}. This means that you will no longer be able to access our system using the provided access key.\
-            \nIf you require continued access to our system, please log into ypur account to request a new access key."
+        title = "Access Key Expired"
+        message = f"Hi {keyData['owner']}, \n\nWe regret to inform you that your access key has expired as of {keyData['expiry_date']}. This means that you will no longer be able to access our system using the provided access key.\
+            \nIf you require continued access to our system, please log into ypur account to request a new access key.\
+            \nThank you for choosing Access Portal."
 
     send_mail(
         title,

@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth import get_user_model
 import uuid
 from django.utils import timezone
+from django.core.validators import MaxValueValidator
+from django.utils.translation import gettext_lazy as _
+
 
 User = get_user_model()
 
@@ -17,6 +20,7 @@ class AccessKey(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     key = models.CharField(max_length=255, unique=True)
     key_tag = models.CharField(max_length=255)
+    validity_duration_days = models.IntegerField(_("Validity in days"), default=30, validators=[MaxValueValidator(365)], help_text="Validity duration in days")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="inactive")
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     procurement_date = models.DateTimeField(null=True, blank=True)

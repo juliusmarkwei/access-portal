@@ -8,6 +8,7 @@ from .serializers import AccessKeySerializer
 from .utils import generateAccessKey, sendEmail
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.db.models import Q
 
 User = get_user_model()
 
@@ -36,6 +37,8 @@ class ITPersonalAccessKeyView(APIView):
     def post(self, request, *args, **kwargs):
         user = request.user
         key_tag = request.data.get("key-tag", None)
+        validity_duration_days = request.data.get("validity-duration-days", None)
+        validity_duration_months = request.data.get("validity-duration-months", None)
         if not key_tag:
             return Response(
                 {"error": "Key-tag is required!"},
@@ -56,11 +59,51 @@ class ITPersonalAccessKeyView(APIView):
                 {"error": "You already have an inactive key pending to be activated!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        data = {"key": generateAccessKey(), "key_tag": key_tag, "owner": user.id, "status": "inactive"}
+
+        if not validity_duration_days and not validity_duration_months:
+            return Response(
+                {
+                    "error": "'validity-duration-days' or 'validity-duration-months' is required!"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if validity_duration_days:
+            calculated_validity_duration_days = int(validity_duration_days)
+            if calculated_validity_duration_days < 1:
+                return Response(
+                    {
+                        "error": "Validity duration must be greater than 0 and less than 365 days!"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        elif validity_duration_months:
+            calculated_validity_duration_days = int(validity_duration_months) * 30
+
+            if calculated_validity_duration_days < 1:
+                return Response(
+                    {
+                        "error": "Validity duration must be greater than 0 and less than 12 months!"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        print("calculated_validity_duration_days", calculated_validity_duration_days)
+        if calculated_validity_duration_days > 365:
+            return Response(
+                {"error": "Validity duration must be less than 365 days!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        data = {
+            "key": generateAccessKey(),
+            "key_tag": key_tag,
+            "owner": user.id,
+            "status": "inactive",
+            "validity_duration_days": calculated_validity_duration_days,
+        }
         serializer = AccessKeySerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            sendEmail(accessGranted=True, recipient=user.email, keyData=data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -74,19 +117,19 @@ class AdminAccessKeyActivationView(APIView):
         userKeytag = request.data.get("key-tag", None)
         if not userEmail and not userKeytag:
             return Response(
-            {"error": "Email and key-tag are required to activate a key."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+                {"error": "Email and key-tag are required to activate a key."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not userEmail:
             return Response(
-            {"error": "Email is required to activate a key."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+                {"error": "Email is required to activate a key."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not userKeytag:
             return Response(
-            {"error": "Key-tag is required to activate a key."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+                {"error": "Key-tag is required to activate a key."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             user = User.objects.get(email=userEmail)
         except User.DoesNotExist:
@@ -95,10 +138,12 @@ class AdminAccessKeyActivationView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            key = AccessKey.objects.get(owner=user, status="inactive", key_tag=userKeytag)
+            key = AccessKey.objects.get(
+                owner=user, status="inactive", key_tag=userKeytag
+            )
         except AccessKey.DoesNotExist:
             return Response(
-                {"error": "No inactive key found for this user"},
+                {"error": f"No inactive key ({userKeytag}) found for this user"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -106,7 +151,7 @@ class AdminAccessKeyActivationView(APIView):
 
         # Set key expiry date to 30 days from now
         activation_date = timezone.now()
-        expiry_date = activation_date + timedelta(minutes=2)
+        expiry_date = activation_date + timedelta(days=key.validity_duration_days)
 
         key.procurement_date = activation_date
         key.expiry_date = expiry_date
@@ -117,13 +162,13 @@ class AdminAccessKeyActivationView(APIView):
             "key": key.key,
             "expiry_date": expiry_date_formatted,
             "owner": user.full_name,
+            "validity_days": key.validity_duration_days,
         }
         sendEmail(accessGranted=True, recipient=user.email, keyData=data)
         return Response(
             {"message": "Key activated successfully"},
             status=status.HTTP_200_OK,
         )
-        
 
 
 class AdminAccessKeyRevocationView(APIView):
@@ -134,19 +179,19 @@ class AdminAccessKeyRevocationView(APIView):
         userKeyTag = request.data.get("key-tag", None)
         if not userEmail and not userKeyTag:
             return Response(
-            {"error": "Email and key-tag are required to revoke a key."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+                {"error": "Email and key-tag are required to revoke a key."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not userEmail:
             return Response(
-            {"error": "Email is required to revoke a key."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+                {"error": "Email is required to revoke a key."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not userKeyTag:
             return Response(
-            {"error": "Key-tag is required to revoke a key."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+                {"error": "Key-tag is required to revoke a key."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         try:
             user = User.objects.get(email=userEmail)
         except User.DoesNotExist:
@@ -158,9 +203,9 @@ class AdminAccessKeyRevocationView(APIView):
             key = AccessKey.objects.get(owner=user, status="active", key_tag=userKeyTag)
         except AccessKey.DoesNotExist:
             return Response(
-            {"error": f"No active key ({userKeyTag}) found for this user"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+                {"error": f"No active key ({userKeyTag}) found for this user"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         key.status = "revoked"
         key.save()
 
@@ -172,4 +217,3 @@ class AdminAccessKeyRevocationView(APIView):
             {"message": "Key revoked successfully"},
             status=status.HTTP_200_OK,
         )
-        
