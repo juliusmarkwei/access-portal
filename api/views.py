@@ -4,11 +4,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
-from .serializers import AccessKeySerializer
+from .serializers import *
 from .utils import generateAccessKey, sendEmail
 from datetime import datetime, timedelta
 from django.utils import timezone
-from django.db.models import Q
 
 User = get_user_model()
 
@@ -217,3 +216,12 @@ class AdminAccessKeyRevocationView(APIView):
             {"message": "Key revoked successfully"},
             status=status.HTTP_200_OK,
         )
+
+
+class AdminAccessKeyView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, *args, **kwargs):
+        keys = AccessKey.objects.all()
+        serializer = AdminAccessKeySerializer(keys, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

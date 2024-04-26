@@ -28,13 +28,14 @@ urlpatterns = [
     path("auth/users/", UserViewSet.as_view({"get": "list"}), name="users"),
     path("access-key", ITPersonalAccessKeyView.as_view(), name="access-key"),
     path(
-        "access-key/activate",
+        "admin/access-key/activate",
         AdminAccessKeyActivationView.as_view(),
         name="admin-access-key-activate",
     ),
     path(
-        "access-key/revoke",
+        "admin/access-key/revoke",
         AdminAccessKeyRevocationView.as_view(),
         name="admin-access-key-revoke",
     ),
+    path("admin/access-key/", AdminAccessKeyView.as_view(), name="admin-access-key"),
 ]
