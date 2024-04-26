@@ -182,8 +182,8 @@ CELERY_BROKER_URL = config("CELERY_BROKER_URL")
 
 
 CELERY_BEAT_SCHEDULE = {
-    'expire-access-keys': {
-        'task': 'api.tasks.expire_access_keys',
-        'schedule': '30.0',
+    "expire-access-keys": {
+        "task": "api.tasks.expire_access_keys",
+        "schedule": "30.0",
     },
 }

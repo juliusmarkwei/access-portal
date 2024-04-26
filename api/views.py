@@ -222,6 +222,25 @@ class AdminAccessKeyView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request, *args, **kwargs):
+        status = request.query_params.get("status", None)
+        owner = request.query_params.get("owner", None)
+        keytag = request.query_params.get("key-tag", None)
+
         keys = AccessKey.objects.all()
+
+        if status:
+            keys = keys.filter(status=status)
+        if owner:
+            try:
+                user = User.objects.get(email=owner)
+                keys = keys.filter(owner=user)
+            except User.DoesNotExist:
+                return Response(
+                    {"error": "User with this email does not exist"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        if keytag:
+            keys = keys.filter(key_tag=keytag)
+
         serializer = AdminAccessKeySerializer(keys, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
