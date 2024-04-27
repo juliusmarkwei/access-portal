@@ -18,18 +18,29 @@ class ITPersonalAccessKeyView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = request.user
-        keyTag = request.query_params.get("key-tag", None)
-        if keyTag:
+        keytag = request.query_params.get("key-tag", None)
+        keyStatus = request.query_params.get("status", None)
+
+        keys = AccessKey.objects.filter(owner=user)
+
+        if keytag:
             try:
-                key = AccessKey.objects.get(owner=user, key_tag=keyTag)
+                key = AccessKey.objects.get(owner=user, key_tag=keytag)
             except AccessKey.DoesNotExist:
                 return Response(
-                    {"error": f"Key ({keyTag}) not found!"},
+                    {"error": f"Key ({keytag}) not found!"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
             serializer = AccessKeySerializer(key)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        keys = AccessKey.objects.filter(owner=user)
+        if keyStatus:
+            keys = keys.filter(status=keyStatus)
+            if keys.count() == 0:
+                return Response(
+                    {"error": f"No {keyStatus} keys found!"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
         serializer = AccessKeySerializer(keys, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -222,25 +233,22 @@ class AdminAccessKeyView(APIView):
     permission_classes = [IsAdminUser]
 
     def get(self, request, *args, **kwargs):
-        status = request.query_params.get("status", None)
+        keyStatus = request.query_params.get("status", None)
         owner = request.query_params.get("owner", None)
         keytag = request.query_params.get("key-tag", None)
 
         keys = AccessKey.objects.all()
 
-        if status:
-            keys = keys.filter(status=status)
+        if keyStatus:
+            keys = keys.filter(status=keyStatus)
         if owner:
             try:
                 user = User.objects.get(email=owner)
-                keys = keys.filter(owner=user)
             except User.DoesNotExist:
-                return Response(
-                    {"error": "User with this email does not exist"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+                return Response({"error": "User with this email does not exist"})
+            keys = keys.filter(owner=user)
         if keytag:
             keys = keys.filter(key_tag=keytag)
 
         serializer = AdminAccessKeySerializer(keys, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data)
