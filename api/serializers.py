@@ -53,3 +53,24 @@ class AdminAccessKeySerializer(serializers.ModelSerializer):
 
         data.pop("id")
         return data
+
+
+# Serializers for Spectaculr UI View
+class AccessKeySerializerDocsView(AccessKeySerializer):
+    class Meta(AccessKeySerializer.Meta):
+        fields = [
+            "key",
+            "key_tag",
+            "validity_duration_days",
+            "status",
+            "procurement_date",
+            "expiry_date",
+        ]
+
+
+class AccessKeySerializerDocsPOST(AccessKeySerializer):
+    class Meta(AccessKeySerializer.Meta):
+        fields = [
+            "key_tag",
+            "validity_duration_days",
+        ]
