@@ -3,7 +3,7 @@ from src.key.models import AccessKey
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .serializers import *
 from .utils import generateAccessKey, sendEmail
 from datetime import datetime, timedelta
@@ -245,10 +245,13 @@ class AdminAccessKeyView(APIView):
             try:
                 user = User.objects.get(email=owner)
             except User.DoesNotExist:
-                return Response({"error": "User with this email does not exist"})
+                return Response(
+                    {"error": "User with this email does not exist"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             keys = keys.filter(owner=user)
         if keytag:
             keys = keys.filter(key_tag=keytag)
 
         serializer = AdminAccessKeySerializer(keys, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)

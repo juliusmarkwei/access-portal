@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     "src.user",
     "api",
     "corsheaders",
-    "drf_yasg",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -134,7 +134,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ]
+    ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {
@@ -187,4 +188,15 @@ CELERY_BEAT_SCHEDULE = {
         "task": "api.tasks.expire_access_keys",
         "schedule": "30.0",
     },
+}
+
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Access Portal API Documentation ©️",
+    "DESCRIPTION": "Our project is a secure access key management system designed to streamline the process of granting and managing access keys for users. It allows users to request, view, and manage their access keys, while administrators have the ability to grant, revoke, and monitor access keys. The system ensures data integrity and security by enforcing access key validity periods and providing granular control over access permissions. Built using Django and Django REST Framework, our solution offers a user-friendly interface and robust backend functionality to meet the access management needs of modern organizations",
+    "VERSION": "1.0.0",
+    "SERVE_URLCONF": "core.urls",
+    "SERVE_PUBLIC": True,
+    "SERVE_INCLUDE_SCHEMA": False,
+    "CONTACT": {"name": "Julius Markwei", "email": "julius.markwei@stu.ucc.edu.gh"},
 }
