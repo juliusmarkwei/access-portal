@@ -25,7 +25,7 @@ class ITPersonalAccessKeyView(APIView):
         summary="Get access key(s)",
         description="Get access key(s). Optionally: Filter by 'key-tag' or 'status' of a key",
         tags=["IT personnel"],
-        responses={200: AccessKeySerializerDocsView()},
+        responses={200: AccessKeySerializerDocsView(many=True)},
         parameters=[
             OpenApiParameter(
                 "key-tag",
@@ -43,17 +43,17 @@ class ITPersonalAccessKeyView(APIView):
     )
     def get(self, request, *args, **kwargs):
         user = request.user
-        keytag = request.query_params.get("key-tag", None)
+        key_tag = request.query_params.get("key-tag", None)
         keyStatus = request.query_params.get("status", None)
 
         keys = AccessKey.objects.filter(owner=user)
 
-        if keytag:
+        if key_tag:
             try:
-                key = AccessKey.objects.get(owner=user, key_tag=keytag)
+                key = AccessKey.objects.get(owner=user, key_tag=key_tag)
             except AccessKey.DoesNotExist:
                 return Response(
-                    {"error": f"Key ({keytag}) not found!"},
+                    {"error": f"Key ({key_tag}) not found!"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
             serializer = AccessKeySerializer(key)
@@ -113,29 +113,22 @@ class ITPersonalAccessKeyView(APIView):
 
         if validity_duration_days:
             calculated_validity_duration_days = int(validity_duration_days)
-            if calculated_validity_duration_days < 1:
+            if not 0 < calculated_validity_duration_days <= 365:
                 return Response(
                     {
-                        "error": "Validity duration must be greater than 0 and less than 365 days!"
+                        "error": "Validity duration must be between 1 and 365 days inclusive"
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         elif validity_duration_months:
             calculated_validity_duration_days = int(validity_duration_months) * 30
-
-            if calculated_validity_duration_days < 1:
+            if not 0 < calculated_validity_duration_days <= 365:
                 return Response(
                     {
-                        "error": "Validity duration must be greater than 0 and less than 12 months!"
+                        "error": "Validity duration must be between 1 and 12 months inclusive"
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        print("calculated_validity_duration_days", calculated_validity_duration_days)
-        if calculated_validity_duration_days > 365:
-            return Response(
-                {"error": "Validity duration must be less than 365 days!"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         data = {
             "key": generateAccessKey(),
@@ -150,29 +143,47 @@ class ITPersonalAccessKeyView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class ITPersonalAccessKeyRevocationDeletionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        methods=["DELETE"],
+        summary="Revoke/Delete an access key",
+        description="Revoke an 'active' access key to deny usage or Delete an 'inctive' access key. The status of the key must be 'inactive' or 'active' to use this endpoint",
+        tags=["IT personnel"],
+        responses={204: None},
+    )
     def delete(self, request, keyTag=None, *args, **kwargs):
         user = request.user
-        if keyTag is None:
+        key_tag = keyTag
+        if key_tag is None:
             return Response(
                 {"error": "Key-tag is required in path!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            key = AccessKey.objects.get(owner=user, key_tag=keyTag)
+            key = AccessKey.objects.get(owner=user, key_tag=key_tag)
         except AccessKey.DoesNotExist:
             return Response(
-                {"error": f"Key ({keyTag}) not found!"},
+                {"error": f"Key ({key_tag}) not found!"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         if key.status == "revoked":
             return Response(
-                {"error": f"Access key ({keyTag}) has already been revoked!"},
+                {"error": f"Access key ({key_tag}) has already been revoked!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if key.status == "expired":
             return Response(
-                {"error": f"Access key ({keyTag}) has already expired!"},
+                {"error": f"Access key ({key_tag}) has already expired!"},
                 status=status.HTTP_400_BAD_REQUEST,
+            )
+        if key.status == "inactive":
+            key.delete()
+            return Response(
+                {"message": "Key deleted successfully!"},
+                status=status.HTTP_204_NO_CONTENT,
             )
         key.status = "revoked"
         key.save()
@@ -182,9 +193,61 @@ class ITPersonalAccessKeyView(APIView):
         )
 
 
-# Admin API View
-class AdminAccessKeyActivationView(APIView):
+# Admin API Vie
+class AdminAccessKeyView(APIView):
     permission_classes = [IsAdminUser]
+    parser_classes = [MultiPartParser, FormParser]
+
+    @extend_schema(
+        methods=["GET"],
+        summary="List access keys of IT personnel(s)",
+        description="List all access keys of all IT personnels or a particular IT personnel. Optionally: Filter by 'status', 'owner', or 'key-tag' of an access key",
+        tags=["admin"],
+        responses={200: AdminAccessKeySerializer()},
+        parameters=[
+            OpenApiParameter(
+                "status",
+                description="Filter by 'status' of access keys",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+            ),
+            OpenApiParameter(
+                "owner",
+                description="Filter by 'owner' of access keys",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+            ),
+            OpenApiParameter(
+                "key-tag",
+                description="Filter by 'key-tag' of access keys",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+            ),
+        ],
+    )
+    def get(self, request, *args, **kwargs):
+        keyStatus = request.query_params.get("status", None)
+        owner = request.query_params.get("owner", None)
+        key_tag = request.query_params.get("key-tag", None)
+
+        keys = AccessKey.objects.all()
+
+        if keyStatus:
+            keys = keys.filter(status=keyStatus)
+        if owner:
+            try:
+                user = User.objects.get(email=owner)
+            except User.DoesNotExist:
+                return Response(
+                    {"error": "User with this email does not exist"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            keys = keys.filter(owner=user)
+        if key_tag:
+            keys = keys.filter(key_tag=key_tag)
+
+        serializer = AdminAccessKeySerializer(keys, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
         methods=["POST"],
@@ -267,10 +330,6 @@ class AdminAccessKeyActivationView(APIView):
             status=status.HTTP_200_OK,
         )
 
-
-class AdminAccessKeyRevocationView(APIView):
-    permission_classes = [IsAdminUser]
-
     @extend_schema(
         methods=["DELETE"],
         summary="Revoke an access key",
@@ -337,59 +396,3 @@ class AdminAccessKeyRevocationView(APIView):
             {"message": "Key revoked successfully"},
             status=status.HTTP_200_OK,
         )
-
-
-class AdminAccessKeyView(APIView):
-    permission_classes = [IsAdminUser]
-    parser_classes = [MultiPartParser, FormParser]
-
-    @extend_schema(
-        methods=["GET"],
-        summary="List access keys of IT personnel(s)",
-        description="List all access keys of all IT personnels or a particular IT personnel. Optionally: Filter by 'status', 'owner', or 'key-tag' of an access key",
-        tags=["admin"],
-        responses={200: AdminAccessKeySerializer()},
-        parameters=[
-            OpenApiParameter(
-                "status",
-                description="Filter by 'status' of access keys",
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.QUERY,
-            ),
-            OpenApiParameter(
-                "owner",
-                description="Filter by 'owner' of access keys",
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.QUERY,
-            ),
-            OpenApiParameter(
-                "key-tag",
-                description="Filter by 'key-tag' of access keys",
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.QUERY,
-            ),
-        ],
-    )
-    def get(self, request, *args, **kwargs):
-        keyStatus = request.query_params.get("status", None)
-        owner = request.query_params.get("owner", None)
-        keytag = request.query_params.get("key-tag", None)
-
-        keys = AccessKey.objects.all()
-
-        if keyStatus:
-            keys = keys.filter(status=keyStatus)
-        if owner:
-            try:
-                user = User.objects.get(email=owner)
-            except User.DoesNotExist:
-                return Response(
-                    {"error": "User with this email does not exist"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            keys = keys.filter(owner=user)
-        if keytag:
-            keys = keys.filter(key_tag=keytag)
-
-        serializer = AdminAccessKeySerializer(keys, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
