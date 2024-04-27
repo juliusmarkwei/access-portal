@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "src.user",
     "api",
     "corsheaders",
+    "drf_yasg",
 ]
 
 MIDDLEWARE = [
