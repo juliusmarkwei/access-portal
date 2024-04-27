@@ -150,6 +150,37 @@ class ITPersonalAccessKeyView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, keyTag=None, *args, **kwargs):
+        user = request.user
+        if keyTag is None:
+            return Response(
+                {"error": "Key-tag is required in path!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            key = AccessKey.objects.get(owner=user, key_tag=keyTag)
+        except AccessKey.DoesNotExist:
+            return Response(
+                {"error": f"Key ({keyTag}) not found!"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if key.status == "revoked":
+            return Response(
+                {"error": f"Access key ({keyTag}) has already been revoked!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if key.status == "expired":
+            return Response(
+                {"error": f"Access key ({keyTag}) has already expired!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        key.status = "revoked"
+        key.save()
+        return Response(
+            {"message": "Key revoked successfully!"},
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
 
 # Admin API View
 class AdminAccessKeyActivationView(APIView):
@@ -241,7 +272,7 @@ class AdminAccessKeyRevocationView(APIView):
     permission_classes = [IsAdminUser]
 
     @extend_schema(
-        methods=["POST"],
+        methods=["DELETE"],
         summary="Revoke an access key",
         description="Revoke an active access key to deny usage by an IT personnel",
         tags=["admin"],
@@ -263,7 +294,7 @@ class AdminAccessKeyRevocationView(APIView):
             ),
         ],
     )
-    def post(self, request):
+    def delete(self, request):
         userEmail = request.data.get("email", None)
         userKeyTag = request.data.get("key-tag", None)
         if not userEmail and not userKeyTag:

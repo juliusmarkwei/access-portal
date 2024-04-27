@@ -26,7 +26,9 @@ urlpatterns = [
     ),
     path("auth/users/me/", UserViewSet.as_view({"get": "me"}), name="me"),
     path("auth/users/", UserViewSet.as_view({"get": "list"}), name="users"),
-    path("access-key", ITPersonalAccessKeyView.as_view(), name="access-key"),
+    path(
+        "access-key/<str:keyTag>", ITPersonalAccessKeyView.as_view(), name="access-key"
+    ),
     path(
         "admin/access-key/activate",
         AdminAccessKeyActivationView.as_view(),
