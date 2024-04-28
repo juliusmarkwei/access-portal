@@ -13,8 +13,8 @@ def generateAccessKey() -> str:
     """
 
     alphabet = string.ascii_letters + string.digits
-    key = "".join(secrets.choice(alphabet) for i in range(80))
-    return key
+    key = "".join(secrets.choice(alphabet) for i in range(50))
+    return "AP-" + key
 
 
 def sendEmail(
