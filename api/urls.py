@@ -16,6 +16,11 @@ urlpatterns = [
         name="activate",
     ),
     path(
+        "auth/user/resend_activation/",
+        UserViewSet.as_view({"post": "resend_activation"}),
+        name="resend_activation",
+    ),
+    path(
         "auth/reset-password/",
         UserViewSet.as_view({"post": "reset_password"}),
         name="reset_password",
