@@ -20,38 +20,70 @@ class AccessKeySerializer(serializers.ModelSerializer):
         data.pop("owner")
         data.pop("created_at")
         data.pop("id")
+        if data["status"] != "active":
+            data["key"] = data["key"][:10] + "..."
+
+        if data["expiry_date"]:
+            # Remove milliseconds if present
+            expiry_date_string = data["expiry_date"].replace("Z", "").split(".")[0]
+            formatted_expiry_date = datetime.strptime(
+                expiry_date_string, "%Y-%m-%dT%H:%M:%S"
+            )
+            data["expiry_date"] = formatted_expiry_date.strftime("%d %B, %Y %I:%M %p")
+
+        if data["procurement_date"]:
+            # Remove milliseconds if present
+            procurement_date_string = (
+                data["procurement_date"].replace("Z", "").split(".")[0]
+            )
+            formatted_procurement_date = datetime.strptime(
+                procurement_date_string, "%Y-%m-%dT%H:%M:%S"
+            )
+            data["procurement_date"] = formatted_procurement_date.strftime(
+                "%d %B, %Y %I:%M %p"
+            )
+
         return data
 
 
 class AdminAccessKeySerializer(serializers.ModelSerializer):
+    owner = serializers.EmailField()
+
     class Meta:
         model = AccessKey
-        fields = "__all__"
+        exclude = ("id",)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data["owner"] = instance.owner.email
 
         if data["expiry_date"]:
+            # Remove milliseconds if present
+            expiry_date_string = data["expiry_date"].replace("Z", "").split(".")[0]
             formatted_expiry_date = datetime.strptime(
-                data["expiry_date"].replace("Z", ""), "%Y-%m-%dT%H:%M:%S.%f"
+                expiry_date_string, "%Y-%m-%dT%H:%M:%S"
             )
             data["expiry_date"] = formatted_expiry_date.strftime("%d %B, %Y %I:%M %p")
 
         if data["procurement_date"]:
+            # Remove milliseconds if present
+            procurement_date_string = (
+                data["procurement_date"].replace("Z", "").split(".")[0]
+            )
             formatted_procurement_date = datetime.strptime(
-                data["procurement_date"].replace("Z", ""), "%Y-%m-%dT%H:%M:%S.%f"
+                procurement_date_string, "%Y-%m-%dT%H:%M:%S"
             )
             data["procurement_date"] = formatted_procurement_date.strftime(
                 "%d %B, %Y %I:%M %p"
             )
 
-        formatted_created_at = datetime.strptime(
-            data["created_at"].replace("Z", ""), "%Y-%m-%dT%H:%M:%S.%f"
-        )
+        # Remove milliseconds if present
+        created_at_string = data["created_at"].replace("Z", "").split(".")[0]
+        formatted_created_at = datetime.strptime(created_at_string, "%Y-%m-%dT%H:%M:%S")
         data["created_at"] = formatted_created_at.strftime("%d %B, %Y %I:%M %p")
 
         data.pop("id")
+
         return data
 
 
@@ -76,21 +108,10 @@ class AccessKeySerializerDocsPOST(AccessKeySerializer):
         ]
 
 
-class AdminAccessKeySerializerDocsPOST(AccessKeySerializer):
+class AdminAccessKeySerializerDocsActionView(AccessKeySerializer):
     email = serializers.EmailField()
 
     class Meta(AccessKeySerializer.Meta):
         fields = [
             "email",
-            "key_tag",
-        ]
-
-
-class AdminAccessKeySerializerDocsREVOKE(AccessKeySerializer):
-    email = serializers.EmailField()
-
-    class Meta(AccessKeySerializer.Meta):
-        fields = [
-            "email",
-            "key_tag",
         ]
