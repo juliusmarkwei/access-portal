@@ -2,6 +2,7 @@ from django.urls import path
 from .views import *
 from djoser.views import UserViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from drf_spectacular.utils import extend_schema
 
 app_name = "access-portal-api"
 
@@ -33,4 +34,9 @@ urlpatterns = [
         name="access-key",
     ),
     path("admin/access-key/", AdminAccessKeyView.as_view(), name="admin-access-key"),
+    path(
+        "admin/school-access-key-info/",
+        SchoolAccessKeyInfoView.as_view(),
+        name="admin-school-access-info",
+    ),
 ]

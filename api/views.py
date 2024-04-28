@@ -79,9 +79,10 @@ class ITPersonalAccessKeyView(APIView):
     )
     def post(self, request, *args, **kwargs):
         user = request.user
-        key_tag = request.data.get("key-tag", None)
-        validity_duration_days = request.data.get("validity-duration-days", None)
+        key_tag = request.data.get("key_tag", None)
+        validity_duration_days = request.data.get("validity_duration_days", None)
         validity_duration_months = request.data.get("validity-duration-months", None)
+
         if not key_tag:
             return Response(
                 {"error": "Key-tag is required!"},
@@ -255,26 +256,11 @@ class AdminAccessKeyView(APIView):
         description="Activate an access key to allow usage by an IT personnel",
         tags=["admin"],
         responses={204: None},
-        parameters=[
-            OpenApiParameter(
-                "email",
-                description="Email of the IT personnel",
-                type=OpenApiTypes.STR,
-                required=True,
-                location="body",
-            ),
-            OpenApiParameter(
-                "key-tag",
-                description="Key tag of the access key to activate",
-                type=OpenApiTypes.STR,
-                required=True,
-                location="body",
-            ),
-        ],
+        request=AdminAccessKeySerializerDocsPOST,
     )
     def post(self, request):
         userEmail = request.data.get("email", None)
-        userKeytag = request.data.get("key-tag", None)
+        userKeytag = request.data.get("key_tag", None)
         if not userEmail and not userKeytag:
             return Response(
                 {"error": "Email and key-tag are required to activate a key."},
@@ -309,7 +295,6 @@ class AdminAccessKeyView(APIView):
 
         key.status = "active"
 
-        # Set key expiry date to 30 days from now
         activation_date = timezone.now()
         expiry_date = activation_date + timedelta(days=key.validity_duration_days)
 
@@ -336,22 +321,7 @@ class AdminAccessKeyView(APIView):
         description="Revoke an active access key to deny usage by an IT personnel",
         tags=["admin"],
         responses={204: None},
-        parameters=[
-            OpenApiParameter(
-                "email",
-                description="Email of the IT personnel",
-                type=OpenApiTypes.STR,
-                required=True,
-                location="body",
-            ),
-            OpenApiParameter(
-                "key-tag",
-                description="Key tag of an active access key to revoke",
-                type=OpenApiTypes.STR,
-                required=True,
-                location="body",
-            ),
-        ],
+        request=AdminAccessKeySerializerDocsPOST,
     )
     def delete(self, request):
         userEmail = request.data.get("email", None)
@@ -396,3 +366,48 @@ class AdminAccessKeyView(APIView):
             {"message": "Key revoked successfully"},
             status=status.HTTP_200_OK,
         )
+
+
+class SchoolAccessKeyInfoView(APIView):
+    permission_classes = [IsAdminUser]
+
+    @extend_schema(
+        methods=["GET"],
+        summary="Get school access key info",
+        description="Get school access key info by providing the school's email",
+        tags=["admin"],
+        responses={200: AccessKeySerializerDocsView(), 404: None},
+        parameters=[
+            OpenApiParameter(
+                "email",
+                description="School email",
+                type=OpenApiTypes.STR,
+                required=True,
+                location=OpenApiParameter.QUERY,
+            ),
+        ],
+    )
+    def get(self, request):
+        email = request.query_params.get("email")
+        if not email:
+            return Response(
+                {"error": "School email is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            active_key = AccessKey.objects.get(owner=user, status="active")
+            serializer = AccessKeySerializer(active_key)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except AccessKey.DoesNotExist:
+            return Response(
+                {"error": "No active key found for this user"},
+                status=status.HTTP_404_NOT_FOUND,
+            )

@@ -74,3 +74,23 @@ class AccessKeySerializerDocsPOST(AccessKeySerializer):
             "key_tag",
             "validity_duration_days",
         ]
+
+
+class AdminAccessKeySerializerDocsPOST(AccessKeySerializer):
+    email = serializers.EmailField()
+
+    class Meta(AccessKeySerializer.Meta):
+        fields = [
+            "email",
+            "key_tag",
+        ]
+
+
+class AdminAccessKeySerializerDocsREVOKE(AccessKeySerializer):
+    email = serializers.EmailField()
+
+    class Meta(AccessKeySerializer.Meta):
+        fields = [
+            "email",
+            "key_tag",
+        ]
