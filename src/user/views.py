@@ -1,10 +1,31 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import CustomTokenObtainPairSerializer
+from .serializers import AdminUserViewSerializer, CustomTokenObtainPairSerializer
 from .models import User
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from api.paginator import QueryResultPagination
+
+
+class ListSchoolInfoView(APIView):
+    permission_classes = [IsAdminUser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    pagination_class = QueryResultPagination
+
+    def get_queryset(self):
+        return User.objects.filter(is_admin=False, is_active=True)
+
+    def get(self, request, *args, **kwargs):
+        users = self.get_queryset()
+        # paginating results if more than 10
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(users, request)
+
+        serializer = AdminUserViewSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

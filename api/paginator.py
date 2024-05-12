@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 
-class AccessKeyPagination(PageNumberPagination):
+class QueryResultPagination(PageNumberPagination):
     page_size = 10  # Set the number of items per page
     page_size_query_param = "page_size"  # Customize the query parameter for page size
     max_page_size = 10  # Set the maximum page size

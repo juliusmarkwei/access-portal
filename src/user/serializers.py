@@ -5,6 +5,7 @@ from djoser.serializers import (
     UserCreatePasswordRetypeSerializer as BaseUserCreatePasswordRetypeSerializer,
 )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from datetime import datetime
 
 User = get_user_model()
 
@@ -32,6 +33,21 @@ class UserSerializer(BaseUserSerializer):
         model = User
         fields = ("email", "full_name", "phone", "is_active", "is_admin")
         extra_kwargs = {"password": {"write_only": True}}
+
+
+class AdminUserViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("email", "full_name", "phone", "is_active", "created_at")
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        created_at_string = data["created_at"].replace("Z", "").split(".")[0]
+        formatted_created_at = datetime.strptime(created_at_string, "%Y-%m-%dT%H:%M:%S")
+        data["created_at"] = formatted_created_at.strftime("%d %B, %Y %I:%M %p")
+
+        return data
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

@@ -14,7 +14,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
-from .paginator import AccessKeyPagination
+from .paginator import QueryResultPagination
 
 User = get_user_model()
 
@@ -23,7 +23,7 @@ User = get_user_model()
 class ITPersonalAccessKeyView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-    pagination_class = AccessKeyPagination
+    pagination_class = QueryResultPagination
 
     @extend_schema(
         methods=["GET"],
@@ -246,7 +246,7 @@ class ITPersonalAccessKeyRevocationDeletionView(APIView):
 class AdminAccessKeyView(APIView):
     permission_classes = [IsAdminUser]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-    pagination_class = AccessKeyPagination
+    pagination_class = QueryResultPagination
 
     @extend_schema(
         methods=["GET"],

@@ -45,4 +45,5 @@ urlpatterns = [
         SchoolAccessKeyInfoView.as_view(),
         name="admin-school-access-info",
     ),
+    path("admin/school-info/", ListSchoolInfoView.as_view(), name="admin-school-info"),
 ]
