@@ -14,7 +14,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
-from rest_framework.pagination import PageNumberPagination
+from .paginator import AccessKeyPagination
 
 User = get_user_model()
 
@@ -23,7 +23,7 @@ User = get_user_model()
 class ITPersonalAccessKeyView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
-    pagination_class = PageNumberPagination
+    pagination_class = AccessKeyPagination
 
     @extend_schema(
         methods=["GET"],
@@ -75,10 +75,10 @@ class ITPersonalAccessKeyView(APIView):
 
         # paginating results if more than 10
         paginator = self.pagination_class()
-        keys = paginator.paginate_queryset(keys, request)
+        page = paginator.paginate_queryset(keys, request)
 
-        serializer = AccessKeySerializer(keys, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = AccessKeySerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     @extend_schema(
         methods=["POST"],
@@ -246,6 +246,7 @@ class ITPersonalAccessKeyRevocationDeletionView(APIView):
 class AdminAccessKeyView(APIView):
     permission_classes = [IsAdminUser]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+    pagination_class = AccessKeyPagination
 
     @extend_schema(
         methods=["GET"],
@@ -297,8 +298,11 @@ class AdminAccessKeyView(APIView):
         if key_tag:
             keys = keys.filter(key_tag=key_tag)
 
-        serializer = AdminAccessKeySerializer(keys, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(keys, request)
+
+        serializer = AdminAccessKeySerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     @extend_schema(
         methods=["POST"],

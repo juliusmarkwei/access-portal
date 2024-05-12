@@ -20,7 +20,12 @@ class AccessKey(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     key = models.CharField(max_length=255, unique=True)
     key_tag = models.CharField(max_length=255)
-    validity_duration_days = models.IntegerField(_("Validity in days"), default=30, validators=[MaxValueValidator(365)], help_text="Validity duration in days")
+    validity_duration_days = models.IntegerField(
+        _("Validity in days"),
+        default=30,
+        validators=[MaxValueValidator(365)],
+        help_text="Validity duration in days",
+    )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="inactive")
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     procurement_date = models.DateTimeField(null=True, blank=True)
@@ -31,13 +36,13 @@ class AccessKey(models.Model):
         verbose_name = "Access Key"
         verbose_name_plural = "Access Keys"
         unique_together = ["owner", "key_tag"]
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"{str(self.owner)}: KEY - {str(self.key_tag)}"
 
     def is_active(self):
         return self.status == "active"
-    
+
     def is_expired(self):
         return self.expiry_date > timezone.now()
-
