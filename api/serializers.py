@@ -18,7 +18,6 @@ class AccessKeySerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data.pop("owner")
-        data.pop("created_at")
         data.pop("id")
         if data["status"] != "active":
             data["key"] = data["key"][:10] + "..."
@@ -42,6 +41,9 @@ class AccessKeySerializer(serializers.ModelSerializer):
             data["procurement_date"] = formatted_procurement_date.strftime(
                 "%d %B, %Y %I:%M %p"
             )
+        created_at_string = data["created_at"].replace("Z", "").split(".")[0]
+        formatted_created_at = datetime.strptime(created_at_string, "%Y-%m-%dT%H:%M:%S")
+        data["created_at"] = formatted_created_at.strftime("%d %B, %Y %I:%M %p")
 
         return data
 
@@ -82,8 +84,6 @@ class AdminAccessKeySerializer(serializers.ModelSerializer):
         formatted_created_at = datetime.strptime(created_at_string, "%Y-%m-%dT%H:%M:%S")
         data["created_at"] = formatted_created_at.strftime("%d %B, %Y %I:%M %p")
 
-        data.pop("id")
-
         return data
 
 
@@ -110,8 +110,7 @@ class AccessKeySerializerDocsPOST(AccessKeySerializer):
 
 class AdminAccessKeySerializerDocsActionView(AccessKeySerializer):
     email = serializers.EmailField()
+    key_tag = serializers.CharField()
 
     class Meta(AccessKeySerializer.Meta):
-        fields = [
-            "email",
-        ]
+        fields = ["email", "key_tag"]

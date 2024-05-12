@@ -10,7 +10,11 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers
+from rest_framework.pagination import PageNumberPagination
 
 User = get_user_model()
 
@@ -18,7 +22,8 @@ User = get_user_model()
 # School's IP personne; API Views
 class ITPersonalAccessKeyView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    pagination_class = PageNumberPagination
 
     @extend_schema(
         methods=["GET"],
@@ -41,6 +46,8 @@ class ITPersonalAccessKeyView(APIView):
             ),
         ],
     )
+    @method_decorator(cache_page(5))  # 5 seconds
+    @method_decorator(vary_on_headers("Authorization"))
     def get(self, request, *args, **kwargs):
         user = request.user
         key_tag = request.query_params.get("key-tag", None)
@@ -65,6 +72,10 @@ class ITPersonalAccessKeyView(APIView):
                     {"error": f"No {keyStatus} keys found!"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
+
+        # paginating results if more than 10
+        paginator = self.pagination_class()
+        keys = paginator.paginate_queryset(keys, request)
 
         serializer = AccessKeySerializer(keys, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -167,20 +178,20 @@ class ITPersonalAccessKeyRevocationDeletionView(APIView):
             key = AccessKey.objects.get(owner=user, key_tag=key_tag)
         except AccessKey.DoesNotExist:
             return Response(
-                {"error": f"Key ({key_tag}) not found!"},
+                {"error": f"Key '{key_tag}' not found!"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         if key.status in ["revoked", "expired", "inactive"]:
             return Response(
-                {"error": f"Access key ({key_tag}) must be active!"},
+                {"error": f"Status of '{keyTag}' should be active to revoke it!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         key.status = "revoked"
         key.save()
+        print(key.status)
         return Response(
-            {"message": "Key revoked successfully!"},
-            status=status.HTTP_204_NO_CONTENT,
+            {"message": "Key revoked successfully!"}, status=status.HTTP_204_NO_CONTENT
         )
 
     @extend_schema(
@@ -207,22 +218,26 @@ class ITPersonalAccessKeyRevocationDeletionView(APIView):
             )
         if key.status == "revoked":
             return Response(
-                {"error": f"Access key ({key_tag}) has already been revoked!"},
+                {
+                    "error": f"Access key '{key_tag}' has been revoked! Note: You can only delete inactive keys"
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if key.status == "expired":
             return Response(
-                {"error": f"Access key ({key_tag}) has already expired!"},
+                {
+                    "error": f"Access key ({key_tag}) has expired! Note: You can only delete inactive keys"
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if key.status in ["active", "revoked", "expired"]:
             return Response(
-                {"error": f"Access key ({key_tag}) must be inactive!"},
+                {"error": f"Status of '{key_tag}' must be inactive!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         key.delete()
         return Response(
-            {"message": f"Inactive key {key_tag} deleted successfully!"},
+            {"message": f"Inactive key deleted successfully!"},
             status=status.HTTP_204_NO_CONTENT,
         )
 
@@ -230,7 +245,7 @@ class ITPersonalAccessKeyRevocationDeletionView(APIView):
 # Admin API Vie
 class AdminAccessKeyView(APIView):
     permission_classes = [IsAdminUser]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     @extend_schema(
         methods=["GET"],
@@ -259,6 +274,8 @@ class AdminAccessKeyView(APIView):
             ),
         ],
     )
+    @method_decorator(cache_page(5))  # 5 seconds
+    @method_decorator(vary_on_headers("Authorization"))
     def get(self, request, *args, **kwargs):
         keyStatus = request.query_params.get("status", None)
         owner = request.query_params.get("owner", None)
@@ -293,10 +310,23 @@ class AdminAccessKeyView(APIView):
     )
     def post(self, request):
         userEmail = request.data.get("email", None)
+        keyTag = request.data.get("key_tag", None)
+
+        if not keyTag and not userEmail:
+            return Response(
+                {"error": "Email and key-tag are required to activate a key."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if not userEmail:
             return Response(
                 {"error": "Email is required to activate a key."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not keyTag:
+            return Response(
+                {"error": "Key-tag is required to activate a key."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
@@ -307,10 +337,10 @@ class AdminAccessKeyView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            key = AccessKey.objects.get(owner=user, status="inactive")
+            key = AccessKey.objects.get(owner=user, status="inactive", key_tag=keyTag)
         except AccessKey.DoesNotExist:
             return Response(
-                {"error": f"No inactive key found for this user"},
+                {"error": f"Status of '{keyTag}' should be inactive to activate it!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -346,9 +376,21 @@ class AdminAccessKeyView(APIView):
     )
     def put(self, request):
         userEmail = request.data.get("email", None)
+        keyTag = request.data.get("key_tag", None)
+
+        if not keyTag and not userEmail:
+            return Response(
+                {"error": "Email and key-tag are required to revoke a key."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         if not userEmail:
             return Response(
                 {"error": "Email is required to revoke a key."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if not keyTag:
+            return Response(
+                {"error": "Key-tag is required to revoke a key."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
@@ -359,10 +401,10 @@ class AdminAccessKeyView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            key = AccessKey.objects.get(owner=user, status="active")
+            key = AccessKey.objects.get(owner=user, status="active", key_tag=keyTag)
         except AccessKey.DoesNotExist:
             return Response(
-                {"error": f"No active key found for this user"},
+                {"error": f"Status of '{keyTag}' should be active to revoke it!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         key.status = "revoked"

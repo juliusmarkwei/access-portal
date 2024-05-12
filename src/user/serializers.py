@@ -4,6 +4,7 @@ from djoser.serializers import (
     UserSerializer as BaseUserSerializer,
     UserCreatePasswordRetypeSerializer as BaseUserCreatePasswordRetypeSerializer,
 )
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
 
@@ -31,3 +32,15 @@ class UserSerializer(BaseUserSerializer):
         model = User
         fields = ("email", "full_name", "phone", "is_active", "is_admin")
         extra_kwargs = {"password": {"write_only": True}}
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        obj = self.user
+        data.update(
+            {
+                "is_admin": obj.is_admin,
+            }
+        )
+        return data
