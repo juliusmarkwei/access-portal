@@ -87,6 +87,15 @@ class AdminAccessKeySerializer(serializers.ModelSerializer):
         return data
 
 
+class AdminSchoolActiveKeyLookUpSerializer(AdminAccessKeySerializer):
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["school"] = instance.owner.full_name
+
+        return data
+
+
 # Serializers for Spectaculr UI View
 class AccessKeySerializerDocsView(AccessKeySerializer):
     class Meta(AccessKeySerializer.Meta):

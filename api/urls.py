@@ -41,9 +41,9 @@ urlpatterns = [
     ),
     path("admin/access-key/", AdminAccessKeyView.as_view(), name="admin-access-key"),
     path(
-        "admin/school-access-key-info/",
-        SchoolAccessKeyInfoView.as_view(),
+        "admin/school-active-key-lookup/<str:email>",
+        SchoolActiveKeyLookup.as_view(),
         name="admin-school-access-info",
     ),
-    path("admin/school-info/", ListSchoolInfoView.as_view(), name="admin-school-info"),
+    path("admin/schools/", ListSchoolInfoView.as_view(), name="admin-schools"),
 ]

@@ -424,22 +424,28 @@ class AdminAccessKeyView(APIView):
         )
 
 
-class SchoolAccessKeyInfoView(APIView):
+class SchoolActiveKeyLookup(APIView):
     permission_classes = [IsAdminUser]
+
+    schooEmail = OpenApiParameter(
+        "schooleEmail",
+        location=OpenApiParameter.QUERY,
+        description="School email",
+        type=OpenApiTypes.STR,
+    )
 
     @extend_schema(
         methods=["GET"],
-        summary="Get school access key info",
+        summary="Lookup school's active key info",
         description="Get school access key info by providing the school's email",
         tags=["admin"],
-        responses={200: AccessKeySerializerDocsView(), 400: None, 404: None},
-        request=AdminAccessKeySerializerDocsActionView,
+        responses={200: AdminSchoolActiveKeyLookUpSerializer(), 400: None, 404: None},
+        parameters=[schooEmail],
     )
-    def get(self, request):
-        email = request.data.get("email")
+    def get(self, request, email=None, *args, **kwargs):
         if not email:
             return Response(
-                {"error": "School email is required"},
+                {"error": "School email is required!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -452,7 +458,7 @@ class SchoolAccessKeyInfoView(APIView):
 
         try:
             active_key = AccessKey.objects.get(owner=user, status="active")
-            serializer = AccessKeySerializer(active_key)
+            serializer = AdminSchoolActiveKeyLookUpSerializer(active_key)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except AccessKey.DoesNotExist:
             return Response(
