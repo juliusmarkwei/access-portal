@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .serializers import *
-from .utils import generateAccessKey, sendEmail
+from .utils import generateAccessKey, sendEmail, reminderEmail
 from datetime import datetime, timedelta
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -83,7 +83,7 @@ class SchoolITPersonalAccessKeyView(APIView):
     @extend_schema(
         methods=["POST"],
         summary="Create an access key",
-        description="Create an access key. Note: You must not an 'active' access key!",
+        description="Create an access key. Note: You must not have an 'active' access key!",
         tags=["SCH IT Personnel"],
         responses={204: AccessKeySerializerDocsView(), 400: None},
         request=AccessKeySerializerDocsPOST,
@@ -158,6 +158,17 @@ class SchoolITPersonalAccessKeyView(APIView):
         serializer = AccessKeySerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+
+            # send a reminder to administartors
+            admins = User.objects.filter(is_admin=True)
+            admins_emails = [admin.email for admin in admins]
+            keyData = {
+                "owner": user.full_name,
+                "email": user.email,
+            }
+            print(admins_emails)
+            reminderEmail(keyData, admins_emails)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

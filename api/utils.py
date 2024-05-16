@@ -34,7 +34,7 @@ def sendEmail(
     """
     if accessGranted:
         title = "Access Key Activated"
-        message = f"Hi {keyData['owner']}, \n\nWe are pleased to inform you that your access key ({keyData['key_tag']}) has been successfully activated and it's scheduled to expire on the {keyData['expiry_date']} - ({keyData['validity_days']} day(s)). You can now enjoy full access to our system and its features.\
+        message = f"Hi {keyData['owner']}, \n\nWe are pleased to inform you that your access key ({keyData['key_tag']}) has been successfully activated and it's scheduled to expire on the {keyData['expiry_date']} - {keyData['validity_days']} day(s). You can now enjoy full access to our system and its features.\
             \n\nThank you for choosing Access Portal."
 
     elif KeyRevoked:
@@ -53,5 +53,21 @@ def sendEmail(
         message,
         settings.EMAIL_HOST_USER,
         [recipient],
+        fail_silently=False,
+    )
+
+
+# Notification email to admins
+def reminderEmail(keyData: dict, admins: list) -> None:
+    print(type(keyData))
+    title = "Access Key Request"
+    message = f"Hi Admin, \n\nA new access key request has been made by {keyData['owner']} - ({keyData['email']}). Kindly review the request and take the necessary action.\
+        \n\nThank you."
+    print("------------------------------")
+    send_mail(
+        title,
+        message,
+        settings.EMAIL_HOST_USER,
+        admins,
         fail_silently=False,
     )
