@@ -29,7 +29,7 @@ class SchoolITPersonalAccessKeyView(APIView):
         methods=["GET"],
         summary="Get access key(s)",
         description="Get access key(s). Optionally: Filter by 'key-tag' or 'status' of a key",
-        tags=["SCH IT personnel"],
+        tags=["SCH IT Personnel"],
         responses={200: AccessKeySerializerDocsView(many=True), 404: None},
         parameters=[
             OpenApiParameter(
@@ -84,7 +84,7 @@ class SchoolITPersonalAccessKeyView(APIView):
         methods=["POST"],
         summary="Create an access key",
         description="Create an access key. Note: You must not an 'active' access key!",
-        tags=["SCH IT personnel"],
+        tags=["SCH IT Personnel"],
         responses={204: AccessKeySerializerDocsView(), 400: None},
         request=AccessKeySerializerDocsPOST,
     )
@@ -169,7 +169,7 @@ class SchoolITPersonalInactiveAccessKeyDeletionView(APIView):
         methods=["DELETE"],
         summary="Delete an inactive access key",
         description=" Delete an 'inactive' access key. The status of the key must be 'inactive' to use this endpoint",
-        tags=["SCH IT personnel"],
+        tags=["SCH IT Personnel"],
         responses={204: None, 400: None, 404: None},
     )
     def delete(self, request, keyTag=None, *args, **kwargs):
@@ -438,3 +438,27 @@ class SchoolActiveKeyLookup(APIView):
                 {"error": "No active key found for this user"},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+
+class ListSchoolInfoView(APIView):
+    permission_classes = [IsAdminUser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    pagination_class = QueryResultPagination
+
+    def get_queryset(self):
+        return User.objects.filter(is_admin=False, is_active=True)
+
+    @extend_schema(
+        responses=AdminUserViewSerializer(many=True),
+        tags=["Admin"],
+        summary="List all school users",
+        description="This endpoint lists all school IT personnels",
+    )
+    def get(self, request, *args, **kwargs):
+        users = self.get_queryset()
+        # paginating results if more than 10
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(users, request)
+
+        serializer = AdminUserViewSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)

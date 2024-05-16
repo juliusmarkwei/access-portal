@@ -96,6 +96,21 @@ class AdminSchoolActiveKeyLookUpSerializer(AdminAccessKeySerializer):
         return data
 
 
+class AdminUserViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("email", "full_name", "phone", "is_active", "created_at")
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        created_at_string = data["created_at"].replace("Z", "").split(".")[0]
+        formatted_created_at = datetime.strptime(created_at_string, "%Y-%m-%dT%H:%M:%S")
+        data["created_at"] = formatted_created_at.strftime("%d %B, %Y %I:%M %p")
+
+        return data
+
+
 # Serializers for Spectaculr UI View
 class AccessKeySerializerDocsView(AccessKeySerializer):
     class Meta(AccessKeySerializer.Meta):

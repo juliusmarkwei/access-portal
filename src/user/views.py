@@ -1,5 +1,6 @@
-from rest_framework_simplejwt.views import TokenObtainPairView
-from .serializers import AdminUserViewSerializer, CustomTokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from djoser.views import UserViewSet
+from .serializers import CustomTokenObtainPairSerializer
 from .models import User
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
@@ -7,31 +8,6 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from api.paginator import QueryResultPagination
-
-
-class ListSchoolInfoView(APIView):
-    permission_classes = [IsAdminUser]
-    parser_classes = [MultiPartParser, FormParser, JSONParser]
-    pagination_class = QueryResultPagination
-
-    def get_queryset(self):
-        return User.objects.filter(is_admin=False, is_active=True)
-
-    @extend_schema(
-        responses=AdminUserViewSerializer(many=True),
-        tags=["Admin"],
-        summary="List all school users",
-        description="This endpoint lists all school IT personnels",
-    )
-    def get(self, request, *args, **kwargs):
-        users = self.get_queryset()
-        # paginating results if more than 10
-        paginator = self.pagination_class()
-        page = paginator.paginate_queryset(users, request)
-
-        serializer = AdminUserViewSerializer(page, many=True)
-        return paginator.get_paginated_response(serializer.data)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -51,8 +27,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         },
         responses=CustomTokenObtainPairSerializer,
         tags=["Auth"],
-        summary="Log in user based on email and password and whether account is active  or deactivated",
-        description="This endpoint checks if the user account is activated or deactivated",
+        summary="Log in user based on email and password",
     )
     def post(self, request, *args, **kwargs):
         try:
@@ -69,3 +44,23 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             )
 
         return super().post(request, *args, **kwargs)
+
+
+@extend_schema(
+    tags=["Auth"],
+)
+class CustomTokenRefreshView(TokenRefreshView):
+    """Token refresh view"""
+
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    pass
+
+
+@extend_schema(
+    tags=["Auth"],
+)
+class CustomUserViewSet(UserViewSet):
+    """Custom implementation of user view set."""
+
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    pass

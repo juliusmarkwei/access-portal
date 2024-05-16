@@ -34,7 +34,7 @@ def sendEmail(
     """
     if accessGranted:
         title = "Access Key Activated"
-        message = f"Hi {keyData['owner']}, \n\nWe are pleased to inform you that your access key ({keyData['key_tag']}) has been successfully activated and it's scheduled to expire at {keyData['expiry_date']} - ({keyData['validity_days']} day(s)). You can now enjoy full access to our system and its features.\
+        message = f"Hi {keyData['owner']}, \n\nWe are pleased to inform you that your access key ({keyData['key_tag']}) has been successfully activated and it's scheduled to expire on the {keyData['expiry_date']} - ({keyData['validity_days']} day(s)). You can now enjoy full access to our system and its features.\
             \n\nThank you for choosing Access Portal."
 
     elif KeyRevoked:
