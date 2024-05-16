@@ -137,16 +137,18 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 2,
+    "PAGE_SIZE": 10,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
+# JWT CONFIGURATIONS
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("JWT",),
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
+# DJOSER CONFIGURATIONS
 DJOSER = {
     "SERIALIZERS": {
         "user_create_password_retype": "src.user.serializers.UserCreateSerializer",
@@ -164,6 +166,10 @@ DJOSER = {
     "LOGIN_FIELD": "email",
 }
 
+SITE_NAME = config("SITE_NAME")
+DOMAIN = config("DOMAIN")
+
+# EMAIL CONFIGURATIONS
 EMAIL_BACKEND = config("EMAIL_BACKEND")
 EMAIL_USE_TLS = config("EMAIL_USE_TLS")
 EMAIL_HOST = config("EMAIL_HOST")
@@ -172,8 +178,6 @@ EMAIL_HOST_USER = config("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-SITE_NAME = config("SITE_NAME")
-DOMAIN = config("DOMAIN")
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -182,18 +186,16 @@ CORS_ALLOWED_ORIGINS = [
 
 
 # CELERY SETTINGS
-CELERY_BACKEND = config("CELERY_BACKEND")
 CELERY_BROKER_URL = config("CELERY_BROKER_URL")
-
 
 CELERY_BEAT_SCHEDULE = {
     "expire-access-keys": {
         "task": "api.tasks.expire_access_keys",
-        "schedule": "30.0",
+        "schedule": 600,  # Run every 10 minutes (600 seconds)
     },
 }
 
-
+# DRF-SPECTACULAR CONFIGURATIONS
 SPECTACULAR_SETTINGS = {
     "TITLE": "Access Portal API Documentation ©️",
     "DESCRIPTION": "Our project is a secure access key management system designed to streamline the process of granting and managing access keys for users. It allows users to request, view, and manage their access keys, while administrators have the ability to grant, revoke, and monitor access keys. The system ensures data integrity and security by enforcing access key validity periods and providing granular control over access permissions. Built using Django and Django REST Framework, our solution offers a user-friendly interface and robust backend functionality to meet the access management needs of modern organizations",

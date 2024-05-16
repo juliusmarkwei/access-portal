@@ -19,7 +19,7 @@ class AccessKey(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     key = models.CharField(max_length=255, unique=True)
-    key_tag = models.CharField(max_length=255)
+    key_tag = models.CharField(max_length=255, unique=True)
     validity_duration_days = models.IntegerField(
         _("Validity in days"),
         default=30,
@@ -35,7 +35,6 @@ class AccessKey(models.Model):
     class Meta:
         verbose_name = "Access Key"
         verbose_name_plural = "Access Keys"
-        unique_together = ["owner", "key_tag"]
         ordering = ["-created_at"]
 
     def __str__(self):

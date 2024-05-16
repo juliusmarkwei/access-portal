@@ -33,11 +33,11 @@ urlpatterns = [
     ),
     path("auth/users/me/", UserViewSet.as_view({"get": "me"}), name="me"),
     path("auth/users/", UserViewSet.as_view({"get": "list"}), name="users"),
-    path("access-key/", ITPersonalAccessKeyView.as_view(), name="access-key"),
+    path("access-key/", SchoolITPersonalAccessKeyView.as_view(), name="access-key"),
     path(
         "access-key/<str:keyTag>",
-        ITPersonalAccessKeyRevocationDeletionView.as_view(),
-        name="access-key",
+        SchoolITPersonalInactiveAccessKeyDeletionView.as_view(),
+        name="access-key-deletion",
     ),
     path("admin/access-key/", AdminAccessKeyView.as_view(), name="admin-access-key"),
     path(

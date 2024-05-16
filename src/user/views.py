@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from api.paginator import QueryResultPagination
 
@@ -18,6 +18,12 @@ class ListSchoolInfoView(APIView):
     def get_queryset(self):
         return User.objects.filter(is_admin=False, is_active=True)
 
+    @extend_schema(
+        responses=AdminUserViewSerializer(many=True),
+        tags=["Admin"],
+        summary="List all school users",
+        description="This endpoint lists all school IT personnels",
+    )
     def get(self, request, *args, **kwargs):
         users = self.get_queryset()
         # paginating results if more than 10

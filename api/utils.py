@@ -34,19 +34,19 @@ def sendEmail(
     """
     if accessGranted:
         title = "Access Key Activated"
-        message = f"Hi {keyData['owner']}, \n\nWe are pleased to inform you that your access key has been successfully activated and it's scheduled to expire at {keyData['expiry_date']} ({keyData['validity_days']} days). You can now enjoy full access to our system and its features.\
-            \nThank you for choosing Access Portal."
+        message = f"Hi {keyData['owner']}, \n\nWe are pleased to inform you that your access key ({keyData['key_tag']}) has been successfully activated and it's scheduled to expire at {keyData['expiry_date']} - ({keyData['validity_days']} day(s)). You can now enjoy full access to our system and its features.\
+            \n\nThank you for choosing Access Portal."
 
     elif KeyRevoked:
         title = "Access Key Revoked"
-        message = f"Hi {keyData['owner']}, \n\nWe regret to inform you that your access key has been revoked. This could be due to a violation of our terms of service. Please contact us if you believe this is an error.\
-            \nThank you for your understanding."
+        message = f"Hi {keyData['owner']}, \n\nWe regret to inform you that your access key ({keyData['key_tag']}) has been revoked. This could be due to a violation of our terms of service. Please contact us if you believe this is an error.\
+            \n\nThank you for your understanding."
 
     elif keyExpired:
         title = "Access Key Expired"
-        message = f"Hi {keyData['owner']}, \n\nWe regret to inform you that your access key has expired as of {keyData['expiry_date']}. This means that you will no longer be able to access our system using the provided access key.\
+        message = f"Hi {keyData['owner']}, \n\nWe regret to inform you that your access key ({keyData['key_tag']})  has expired as of {keyData['expiry_date']}. This means that you will no longer be able to access our system using the provided access key.\
             \nIf you require continued access to our system, please log into ypur account to request a new access key.\
-            \nThank you for choosing Access Portal."
+            \n\nThank you for choosing Access Portal."
 
     send_mail(
         title,

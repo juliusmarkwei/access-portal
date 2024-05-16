@@ -20,7 +20,7 @@ User = get_user_model()
 
 
 # School's IP personne; API Views
-class ITPersonalAccessKeyView(APIView):
+class SchoolITPersonalAccessKeyView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     pagination_class = QueryResultPagination
@@ -29,7 +29,7 @@ class ITPersonalAccessKeyView(APIView):
         methods=["GET"],
         summary="Get access key(s)",
         description="Get access key(s). Optionally: Filter by 'key-tag' or 'status' of a key",
-        tags=["IT personnel"],
+        tags=["SCH IT personnel"],
         responses={200: AccessKeySerializerDocsView(many=True), 404: None},
         parameters=[
             OpenApiParameter(
@@ -84,7 +84,7 @@ class ITPersonalAccessKeyView(APIView):
         methods=["POST"],
         summary="Create an access key",
         description="Create an access key. Note: You must not an 'active' access key!",
-        tags=["IT personnel"],
+        tags=["SCH IT personnel"],
         responses={204: AccessKeySerializerDocsView(), 400: None},
         request=AccessKeySerializerDocsPOST,
     )
@@ -112,6 +112,12 @@ class ITPersonalAccessKeyView(APIView):
         if inactveKeyExist:
             return Response(
                 {"error": "You already have an inactive key pending to be activated!"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if AccessKey.objects.filter(key_tag=key_tag).exists():
+            return Response(
+                {"error": "Key-tag already taken!"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -156,49 +162,14 @@ class ITPersonalAccessKeyView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ITPersonalAccessKeyRevocationDeletionView(APIView):
+class SchoolITPersonalInactiveAccessKeyDeletionView(APIView):
     permission_classes = [IsAuthenticated]
-
-    @extend_schema(
-        methods=["PUT"],
-        summary="Revoke an active access key",
-        description="Revoke an 'active' access key to deny usage. The status of the key must be 'active' to use this endpoint",
-        tags=["IT personnel"],
-        responses={204: None, 400: None, 404: None},
-    )
-    def put(self, request, keyTag=None, *args, **kwargs):
-        user = request.user
-        key_tag = keyTag
-        if key_tag is None:
-            return Response(
-                {"error": "Key-tag is required in path!"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        try:
-            key = AccessKey.objects.get(owner=user, key_tag=key_tag)
-        except AccessKey.DoesNotExist:
-            return Response(
-                {"error": f"Key '{key_tag}' not found!"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        if key.status in ["revoked", "expired", "inactive"]:
-            return Response(
-                {"error": f"Status of '{keyTag}' should be active to revoke it!"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        key.status = "revoked"
-        key.save()
-        print(key.status)
-        return Response(
-            {"message": "Key revoked successfully!"}, status=status.HTTP_204_NO_CONTENT
-        )
 
     @extend_schema(
         methods=["DELETE"],
         summary="Delete an inactive access key",
         description=" Delete an 'inactive' access key. The status of the key must be 'inactive' to use this endpoint",
-        tags=["IT personnel"],
+        tags=["SCH IT personnel"],
         responses={204: None, 400: None, 404: None},
     )
     def delete(self, request, keyTag=None, *args, **kwargs):
@@ -250,9 +221,9 @@ class AdminAccessKeyView(APIView):
 
     @extend_schema(
         methods=["GET"],
-        summary="List access keys of IT personnel(s)",
-        description="List all access keys of all IT personnels or a particular IT personnel. Optionally: Filter by 'status', 'owner', or 'key-tag' of an access key",
-        tags=["admin"],
+        summary="List access keys of School IT personnel(s)",
+        description="List all access keys of all School IT personnels or a particular IT personnel. Optionally: Filter by 'status', 'owner', or 'key-tag' of an access key",
+        tags=["Admin"],
         responses={200: AdminAccessKeySerializer(many=True), 400: None},
         parameters=[
             OpenApiParameter(
@@ -307,8 +278,8 @@ class AdminAccessKeyView(APIView):
     @extend_schema(
         methods=["POST"],
         summary="Activate an access key",
-        description="Activate an access key to allow usage by an IT personnel",
-        tags=["admin"],
+        description="Activate an access key to allow usage by a School IT personnel",
+        tags=["Admin"],
         responses={204: None, 400: None},
         request=AdminAccessKeySerializerDocsActionView,
     )
@@ -360,6 +331,7 @@ class AdminAccessKeyView(APIView):
         expiry_date_formatted = expiry_date.strftime("%d %B, %Y %H:%M %p")
         data = {
             "key": key.key,
+            "key_tag": keyTag,
             "expiry_date": expiry_date_formatted,
             "owner": user.full_name,
             "validity_days": key.validity_duration_days,
@@ -373,8 +345,8 @@ class AdminAccessKeyView(APIView):
     @extend_schema(
         methods=["PUT"],
         summary="Revoke an access key",
-        description="Revoke an active access key to deny usage by an IT personnel",
-        tags=["admin"],
+        description="Revoke an active access key to deny usage by a School IT personnel",
+        tags=["Admin"],
         responses={200: None, 400: None},
         request=AdminAccessKeySerializerDocsActionView,
     )
@@ -416,6 +388,7 @@ class AdminAccessKeyView(APIView):
 
         data = {
             "owner": user.full_name,
+            "key_tag": keyTag,
         }
         sendEmail(KeyRevoked=True, recipient=user.email, keyData=data)
         return Response(
@@ -438,7 +411,7 @@ class SchoolActiveKeyLookup(APIView):
         methods=["GET"],
         summary="Lookup school's active key info",
         description="Get school access key info by providing the school's email",
-        tags=["admin"],
+        tags=["Admin"],
         responses={200: AdminSchoolActiveKeyLookUpSerializer(), 400: None, 404: None},
         parameters=[schooEmail],
     )
