@@ -59,11 +59,9 @@ def sendEmail(
 
 # Notification email to admins
 def reminderEmail(keyData: dict, admins: list) -> None:
-    print(type(keyData))
     title = "Access Key Request"
     message = f"Hi Admin, \n\nA new access key request has been made by {keyData['owner']} - ({keyData['email']}). Kindly review the request and take the necessary action.\
         \n\nThank you."
-    print("------------------------------")
     send_mail(
         title,
         message,
