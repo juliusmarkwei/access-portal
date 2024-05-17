@@ -166,7 +166,6 @@ class SchoolITPersonalAccessKeyView(APIView):
                 "owner": user.full_name,
                 "email": user.email,
             }
-            print(admins_emails)
             reminderEmail(keyData, admins_emails)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -41,5 +41,5 @@ urlpatterns = [
         SchoolActiveKeyLookup.as_view(),
         name="admin-school-access-info",
     ),
-    path("admin/schools/", ListSchoolInfoView.as_view(), name="admin-schools"),
+    path("admin/schools/", ListSchoolInfoView.as_view(), name="admin-list-school-info"),
 ]
