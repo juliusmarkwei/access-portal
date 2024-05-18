@@ -16,14 +16,14 @@ def expire_access_keys():
     for key in expired_keys:
         key.status = "expired"
         key.save()
-        key_user = key.owner
+        key_owner = key.owner
 
         # Send email to the key owner
         data = {
-            "owner": key_user.full_name,
-            "expiry_date": str(key.expiry_date).strftime("%d %B, %Y %H:%M %p"),
+            "owner": key_owner.full_name,
+            "expiry_date": key.expiry_date.strftime("%d %B, %Y %H:%M %p"),
             "key_tag": key.key_tag,
         }
-        sendEmail(keyExpired=True, recipient=key_user.email, keyData=data)
+        sendEmail(keyExpired=True, recipient=key_owner.email, keyData=data)
     print("number of keys expired: ", len(expired_keys))
     return "Done!"

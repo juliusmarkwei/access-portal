@@ -1,12 +1,12 @@
 # Access Portal Backend build with <a href="https://www.django-rest-framework.org/" target="_blank">Django Rest Framework</a> and <a href="https://docs.celeryq.dev/en/stable/index.html" target="_blank"> Celery
 
 <a href="" target="_blank">
-    <img src="./assets/logo.jpg" height=250px width=100% >
+    <img src="./assets/logo.jpg" height=300px width=100% >
 </a>
 
 ## Overview
 
-The Access Key Manager is a web application developed for Micro-Focus Inc. to manage access keys for their multi-tenant school management platform. Schools can use this application to purchase access keys to activate their accounts. This project involves building a key manager that includes user authentication, key management, and integration capabilities.
+Access Portal is an Access Key Manager web application developed for Micro-Focus Inc. to manage access keys for their multi-tenant school management platform. Schools can use this application to purchase access keys to activate their accounts. This project involves building a key manager that includes user authentication, key management, and integration capabilities.
 
 ## Project Objective
 
@@ -30,8 +30,9 @@ Micro-Focus Inc., a software company, has built a school management platform tha
 
 ## Additions (top-ups)
 
-1. School IT Personnel's key created must be activated by admin. Admins are notified via email if a key is created.
-2. When status of a key changes, School IT Personnels are alerted via email by a custome mail template.
+1. School IT Personnel's key created must be activated by admin. Admins are `notified` via `email` if a key is created.
+2. When status of a key changes, School IT Personnels are `alerted` via `email` by a custome mail template.
+3. When creating a key, in addition to a `key-tag`, a user must input the `number of days` the key should be active which starts at the time of activation.
 
 The project was inspired by the need for a robust and efficient way to manage access keys for a multi-tenant school management platform. Every aspect of this project required extensive research and careful planning to ensure seamless integration and functionality. The activities involved in this project are as follows:
 
@@ -46,7 +47,7 @@ The project was inspired by the need for a robust and efficient way to manage ac
 ## Image of the Browsable API
 
 <a href="" target="_blank" title="Visit live">
-    <img src="./assets/image of api.png" height="450px" width="100%" >
+    <img src="./assets/image of api.png" height="480px" width="100%" >
 </a>
 
 ## Technologies utilized in developing the system
@@ -68,13 +69,13 @@ The project was inspired by the need for a robust and efficient way to manage ac
 <h3>1. Admin View</h3>
 <hr/>
 <a href="" target="_blank" title="Admin panel"> 
-<img src=".//assets/admin panel.png" width="100%" height="360px"></img>
+<img src=".//assets/admin panel.png" width="100%" height="400px"></img>
 </a>
 <br/>
 <h3>2. School IT Personnel View</h3>
 <hr/>
 <a href="" target="_blank" title="School IT Personnel View"> 
-<img src=".//assets/school IT personnel page.png" width="100%" height="360px"></img>
+<img src=".//assets/school IT personnel page.png" width="100%" height="400px"></img>
 </a>
 <br/><br/>
 
