@@ -1,7 +1,7 @@
 # Access Portal Backend build with <a href="https://www.django-rest-framework.org/" target="_blank">Django Rest Framework</a> and <a href="https://docs.celeryq.dev/en/stable/index.html" target="_blank"> Celery
 
-<a href="https://www.django-rest-framework.org/" target="_blank">
-    <img src="./assets/logo.jpg" height=240px width=100% >
+<a href="" target="_blank">
+    <img src="./assets/logo.jpg" height=250px width=100% >
 </a>
 
 ## Overview
@@ -78,7 +78,7 @@ The project was inspired by the need for a robust and efficient way to manage ac
 </a>
 <br/><br/>
 
--   Frontend reposotory can be found <a href="https://github.com/juliusmarkwei/access-portal-fe" target="_blank" title="frontend github repo"> <strong>`here`</strong><svg xmlns="http://www.w3.org/2000/svg" height="12px" width="30px" fill="red" viewBox="0 0 576 512"><path d="M64 0C28.7 0 0 28.7 0 64V352c0 35.3 28.7 64 64 64H240l-10.7 32H160c-17.7 0-32 14.3-32 32s14.3 32 32 32H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H346.7L336 416H512c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64zM512 64V288H64V64H512z"/></svg></a>
+-   Frontend repository can be found <a href="https://github.com/juliusmarkwei/access-portal-fe" target="_blank" title="frontend github repo"> <strong>`here`</strong><svg xmlns="http://www.w3.org/2000/svg" height="12px" width="30px" fill="red" viewBox="0 0 576 512"><path d="M64 0C28.7 0 0 28.7 0 64V352c0 35.3 28.7 64 64 64H240l-10.7 32H160c-17.7 0-32 14.3-32 32s14.3 32 32 32H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H346.7L336 416H512c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64zM512 64V288H64V64H512z"/></svg></a>
 
 ## Prerequisites
 
@@ -137,6 +137,15 @@ The project was inspired by the need for a robust and efficient way to manage ac
 ```
     python3 manage runserver
 ```
+
+6. #### Start the celery worker and celery beat
+
+```
+    celery -A core worker --loglevel=info
+    celery -A core beat --loglevel=info
+```
+
+-   Make sure your redis server is up and running before you run the comand above.
 
 ## Get Involved
 

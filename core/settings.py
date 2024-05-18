@@ -17,7 +17,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -87,6 +88,11 @@ DATABASES = {
         "PORT": config("DB_PORT"),
     }
 }
+
+# Heroku DB Configuration
+import dj_database_url
+db_from_env = dj_database_url.config(conn_max_age=600)
+DATABASES["default"].update(db_from_env)
 
 
 # Password validation
