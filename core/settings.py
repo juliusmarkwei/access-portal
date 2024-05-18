@@ -29,17 +29,16 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # drf & djoer auth apps
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "djoser",
-    # my apps
     "src.key",
     "src.user",
     "api",
     "corsheaders",
     "drf_spectacular",
+    "whitenoise",
 ]
 
 MIDDLEWARE = [
