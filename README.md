@@ -1,7 +1,7 @@
 # Access Portal Backend build with <a href="https://www.django-rest-framework.org/" target="_blank">Django Rest Framework</a> and <a href="https://docs.celeryq.dev/en/stable/index.html" target="_blank"> Celery
 
 <a href="https://www.django-rest-framework.org/" target="_blank">
-    <img src="./static/assests/logo.jpg" height=240px width=100% >
+    <img src="./assets/logo.jpg" height=240px width=100% >
 </a>
 
 ## Overview
@@ -46,7 +46,7 @@ The project was inspired by the need for a robust and efficient way to manage ac
 ## Image of the Browsable API
 
 <a href="" target="_blank" title="Visit live">
-    <img src="./static/assests/image of api.png" height="450px" width="100%" >
+    <img src="./assets/image of api.png" height="450px" width="100%" >
 </a>
 
 ## Technologies utilized in developing the system
@@ -68,13 +68,13 @@ The project was inspired by the need for a robust and efficient way to manage ac
 <h3>1. Admin View</h3>
 <hr/>
 <a href="" target="_blank" title="Admin panel"> 
-<img src="./static//assests/admin panel.png" width="100%" height="360px"></img>
+<img src=".//assets/admin panel.png" width="100%" height="360px"></img>
 </a>
 <br/>
 <h3>2. School IT Personnel View</h3>
 <hr/>
 <a href="" target="_blank" title="School IT Personnel View"> 
-<img src="./static//assests/school IT personnel page.png" width="100%" height="360px"></img>
+<img src=".//assets/school IT personnel page.png" width="100%" height="360px"></img>
 </a>
 <br/><br/>
 
