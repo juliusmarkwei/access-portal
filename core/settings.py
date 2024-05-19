@@ -2,6 +2,8 @@ from pathlib import Path
 from decouple import config
 from datetime import timedelta
 import os
+import django_heroku
+import dj_database_url
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -87,12 +89,6 @@ DATABASES = {
         "PORT": config("DB_PORT"),
     }
 }
-
-# Heroku DB Configuration
-import dj_database_url
-
-db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
-DATABASES["default"].update(db_from_env)
 
 
 # Password validation
@@ -214,3 +210,6 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "CONTACT": {"name": "Julius Markwei", "email": "julius.markwei@stu.ucc.edu.gh"},
 }
+
+
+django_heroku.settings(locals())
