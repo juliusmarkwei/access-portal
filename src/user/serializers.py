@@ -13,7 +13,7 @@ User = get_user_model()
 class UserCreateSerializer(BaseUserCreatePasswordRetypeSerializer):
     class Meta(BaseUserCreatePasswordRetypeSerializer.Meta):
         model = User
-        fields = ("email", "full_name", "phone", "is_active", "is_admin", "password")
+        fields = ("email", "full_name", "phone", "password")
         extra_kwargs = {"password": {"write_only": True}}
 
     def perform_create(self, validated_data):
@@ -36,6 +36,8 @@ class UserSerializer(BaseUserSerializer):
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    # remove is_admin and is_active from serializer
+
     def validate(self, attrs):
         data = super().validate(attrs)
         obj = self.user

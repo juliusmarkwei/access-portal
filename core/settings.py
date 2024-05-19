@@ -211,5 +211,5 @@ SPECTACULAR_SETTINGS = {
     "CONTACT": {"name": "Julius Markwei", "email": "julius.markwei@stu.ucc.edu.gh"},
 }
 
-
+# Heroku CONFIGURATION
 django_heroku.settings(locals())

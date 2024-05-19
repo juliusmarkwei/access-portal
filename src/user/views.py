@@ -46,9 +46,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         return super().post(request, *args, **kwargs)
 
 
-@extend_schema(
-    tags=["Auth"],
-)
+@extend_schema(tags=["Auth"])
 class CustomTokenRefreshView(TokenRefreshView):
     """Token refresh view"""
 
@@ -56,9 +54,7 @@ class CustomTokenRefreshView(TokenRefreshView):
     pass
 
 
-@extend_schema(
-    tags=["Auth"],
-)
+@extend_schema(tags=["Auth"])
 class CustomUserViewSet(UserViewSet):
     """Custom implementation of user view set."""
 
