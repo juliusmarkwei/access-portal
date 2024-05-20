@@ -19,7 +19,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["access-portal-client.vercel.app"]
 
 
 # Application definition
@@ -187,6 +187,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://access-portal-client.vercel.app",
 ]
 
 
