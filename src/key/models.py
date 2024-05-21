@@ -27,7 +27,7 @@ class AccessKey(models.Model):
         help_text="Validity duration in days",
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="inactive")
-    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     procurement_date = models.DateTimeField(null=True, blank=True)
     expiry_date = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
