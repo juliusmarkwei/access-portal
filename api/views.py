@@ -409,13 +409,7 @@ class AdminAccessKeyView(APIView):
 
 class SchoolActiveKeyLookup(APIView):
     permission_classes = [IsAdminUser]
-
-    schooEmail = OpenApiParameter(
-        "schooleEmail",
-        location=OpenApiParameter.QUERY,
-        description="School email",
-        type=OpenApiTypes.STR,
-    )
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     @extend_schema(
         methods=["GET"],
@@ -423,7 +417,6 @@ class SchoolActiveKeyLookup(APIView):
         description="Get school access key info by providing the school's email",
         tags=["Admin"],
         responses={200: AdminSchoolActiveKeyLookUpSerializer(), 400: None, 404: None},
-        parameters=[schooEmail],
     )
     def get(self, request, email=None, *args, **kwargs):
         if not email:
