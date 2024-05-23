@@ -19,7 +19,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = ["access-portal-client.vercel.app"]
+ALLOWED_HOSTS = ["access-portal-client.vercel.app", "*"]
 
 
 # Application definition
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "drf_spectacular",
     "whitenoise",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -200,6 +201,14 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 600,  # Run every 10 minutes (600 seconds)
     },
 }
+
+# CELERY_RESULT_BACKEND = "django-db"
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TASK_SELERLIZER = "json"
+CELERY_TIMEZONE = "Asia/Kolkata"
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 
 # DRF-SPECTACULAR CONFIGURATIONS
