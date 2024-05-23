@@ -39,23 +39,23 @@ Micro-Focus Inc., a software company, has built a school management platform tha
 
 **Admin**
 
--   Email - accessportalinfo@gmail.com
--   Password - admin
+-   Email - `accessportalinfo@gmail.com`
+-   Password - `admin`
 
 ### **School IT Personnel(s)**
 
--   Email - julius.markwei@stu.ucc.edu.gh
--   Password - guest@123
+-   Email - `julius.markwei@stu.ucc.edu.gh`
+-   Password - `guest@123`
 
 ---
 
--   Email - tiktechgh@gmail.com
--   Password - guest@123
+-   Email - `tiktechgh@gmail.com`
+-   Password - `guest@123`
 
 ---
 
--   Email - juliussingh23k@gmail.com
--   Password - guest@123
+-   Email - `juliussingh23k@gmail.com`
+-   Password - `guest@123`
 
 The project was inspired by the need for a robust and efficient way to manage access keys for a multi-tenant school management platform. Every aspect of this project required extensive research and careful planning to ensure seamless integration and functionality. The activities involved in this project are as follows:
 
