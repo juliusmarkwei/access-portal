@@ -42,7 +42,7 @@ Micro-Focus Inc., a software company, has built a school management platform tha
 -   Email - `accessportalinfo@gmail.com`
 -   Password - `admin`
 
-### **School IT Personnel(s)**
+**School IT Personnel(s)**
 
 -   Email - `julius.markwei@stu.ucc.edu.gh`
 -   Password - `guest@123`
