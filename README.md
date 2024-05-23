@@ -16,23 +16,46 @@ Micro-Focus Inc., a software company, has built a school management platform tha
 
 ### School IT Personnel
 
-1. **Signup & Login**: School IT personnel is able to sign up and log in with an email and password. Account verification and a reset password feature to recover lost passwords is included.
-2. **Access Key Management**: Users is able to see a list of all access keys granted: active, expired, or revoked.
-3. **Key Details**: For each access key, users is able to see the status, date of procurement, and expiry date.
-4. **Key Constraints**: Users should not be able to obtain a new key if an active key is already assigned. Only one key can be active at a time.
+1. **`Signup & Login`**: School IT personnel is able to sign up and log in with an email and password. Account verification and a reset password feature to recover lost passwords is included.
+2. **`Access Key Management`**: Users is able to see a list of all access keys granted: active, expired, or revoked.
+3. **`Key Details`**: For each access key, users is able to see the status, date of procurement, and expiry date.
+4. **`Key Constraints`**: Users should not be able to obtain a new key if an active key is already assigned. Only one key can be active at a time.
 
 ### Micro-Focus Admin
 
-1. **Admin Login**: Admins is able to log in with an email and password.
-2. **Manual Key Revocation**: Admins is able to manually revoke an access key.
-3. **Key Overview**: Admins is able to see all keys generated on the platform, including their status, date of procurement, and expiry date.
-4. **Integration Endpoint**: Admins is able to access an endpoint that, given a school email, returns the status and details of the active key if any, or a 404 status if no active key is found. This allows integration with the school management software.
+1. **`Admin Login`**: Admins is able to log in with an email and password.
+2. **`Manual Key Revocation`**: Admins is able to manually revoke an access key.
+3. **`Key Overview`**: Admins is able to see all keys generated on the platform, including their status, date of procurement, and expiry date.
+4. **`Active Key LookUp Endpoint`**: Admins is able to access an endpoint that, given a school email, returns the status and details of the active key if any, or a 404 status if no active key is found. This allows integration with the school management software.
 
 ## Additions (top-ups)
 
 1. School IT Personnel's key created must be activated by admin. Admins are `notified` via `email` if a key is created.
 2. When status of a key changes, School IT Personnels are `alerted` via `email` by a custome mail template.
-3. When creating a key, in addition to a `key-tag`, a user must input the `number of days` the key should be active which starts at the time of activation.
+3. When creating a key, in addition to a `key-tag`, a user must input the `number of days` the key should be active which `starts at the time of activation` (procurement date).
+4. A School IT Personnel can `delete` a key while the status is still `inactive` and also can `not create` a key while the status is `inactive`.
+
+## System Credentials - Testing ⚙️
+
+**Admin**
+
+-   Email - accessportalinfo@gmail.com
+-   Password - admin
+
+### **School IT Personnel(s)**
+
+-   Email - julius.markwei@stu.ucc.edu.gh
+-   Password - guest@123
+
+---
+
+-   Email - tiktechgh@gmail.com
+-   Password - guest@123
+
+---
+
+-   Email - juliussingh23k@gmail.com
+-   Password - guest@123
 
 The project was inspired by the need for a robust and efficient way to manage access keys for a multi-tenant school management platform. Every aspect of this project required extensive research and careful planning to ensure seamless integration and functionality. The activities involved in this project are as follows:
 
