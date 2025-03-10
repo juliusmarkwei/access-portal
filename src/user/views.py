@@ -2,11 +2,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from djoser.views import UserViewSet
 from .serializers import CustomTokenObtainPairSerializer
 from .models import User
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+from drf_spectacular.utils import extend_schema
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 

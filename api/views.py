@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .serializers import *
 from .utils import generateAccessKey, sendEmail, reminderEmail
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
@@ -19,7 +19,7 @@ from .paginator import QueryResultPagination
 User = get_user_model()
 
 
-# School's IP personne; API Views
+# School's IT personnel; API Views
 class SchoolITPersonalAccessKeyView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -223,7 +223,7 @@ class SchoolITPersonalInactiveAccessKeyDeletionView(APIView):
         )
 
 
-# Admin API Vie
+# Admin API View
 class AdminAccessKeyView(APIView):
     permission_classes = [IsAdminUser]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
@@ -455,7 +455,7 @@ class ListSchoolInfoView(APIView):
         responses=AdminUserViewSerializer(many=True),
         tags=["Admin"],
         summary="List all school users",
-        description="This endpoint lists all school IT personnels",
+        description="This endpoint lists all school IT personnel",
     )
     def get(self, request, *args, **kwargs):
         users = self.get_queryset()
